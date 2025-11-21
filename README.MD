@@ -15,7 +15,7 @@ This tool aims to become the **NestJS of the Rust world** - a comprehensive fram
 - ❌ Write boilerplate code
 
 ### After cargo-mold:
-- ✅ `cargo mold new my-app` - done in seconds
+- ✅ `cargo-mold new my-app` - done in seconds
 - ✅ Production-ready structure out of the box
 - ✅ Follows Rust & Actix best practices
 - ✅ Focus on your business logic, not setup
