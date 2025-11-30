@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Future-ready**: Architecture now supports multiple template types
 
 ### Refactor
-- **Code organization**: Separated all template content from Rust code
+- **Code organization**: Separated all template content from Rust code and utils folder is now a file
 - **Maintainability**: Templates can now be edited without recompiling the binary
 
 ### Fixed

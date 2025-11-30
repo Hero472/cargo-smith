@@ -1,4 +1,6 @@
-use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}, utils::utils::{create_project_structure, generate_mod_files}};
+use std::{fs, path::{Path, PathBuf}};
+
+use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}};
 
 
 use anyhow::Result;
@@ -79,4 +81,34 @@ impl Template for TraditionalTemplate {
 
         Ok(())
     }
+}
+
+fn create_project_structure(
+    project_name: &str,
+    dirs: &[&str],
+) -> Result<()> {
+    let base = Path::new(project_name);
+
+    for dir in dirs {
+        let full_path: PathBuf = base.join(dir);
+        fs::create_dir_all(&full_path)?;
+    }
+
+    Ok(())
+}
+
+async fn generate_mod_files(
+    project_name: &str,
+    files: &[(&str, &str)],
+    template: &TemplateType
+) -> Result<()> {
+    for (path, content) in files {
+        TemplateEngine::generate_from_template(
+            project_name,
+            path,
+            content,
+            template,
+        ).await?;
+    }
+    Ok(())
 }
