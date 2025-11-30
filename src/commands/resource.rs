@@ -18,14 +18,14 @@ pub async fn execute(args: ResourceArgs) -> anyhow::Result<()> {
 
     if !Path::new(".cargo-mold").exists() {
         bail!(
-            "❌ Not a cargo-mold project.\n\
+            "Not a cargo-mold project.\n\
              Run this command in a project created with `cargo mold new`\n\
              Or create a new project with: `cargo mold new {}`",
             args.name
         );
     }
 
-    println!("📁 Generating resource: {}", args.name);
+    println!("Generating resource: {}", args.name);
 
     let files = [
         ("src/models/{}.rs", MODEL_RS_TPL),
@@ -41,8 +41,8 @@ pub async fn execute(args: ResourceArgs) -> anyhow::Result<()> {
     update_modules(&args.name).await?;
     update_resource_cargo_mold(args.name.clone()).await?;
     
-    println!("✅ Resource '{}' created successfully!", args.name);
-    println!("📝 Generated files:");
+    println!("Resource '{}' created successfully!", args.name);
+    println!("Generated files:");
     println!("   - src/models/{}.rs", args.name);
     println!("   - src/handlers/{}_handlers.rs", args.name);
     println!("   - src/routes/{}_routes.rs", args.name);

@@ -1,7 +1,7 @@
 # .cargo-mold
 [project]
 name = "{{name}}"
-mold_version = "0.2.1"
+mold_version = "0.3.0"
 created_at = "{{now}}"
 
 [generated]

@@ -7,7 +7,7 @@ pub struct ModuleArgs {
 }
 
 pub async fn execute(args: ModuleArgs) -> anyhow::Result<()> {
-    println!("📦 Generating module: {}", args.name);
+    println!("Generating module: {}", args.name);
     // Your module generation logic here
     Ok(())
 }

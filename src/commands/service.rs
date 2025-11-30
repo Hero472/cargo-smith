@@ -7,7 +7,7 @@ pub struct ServiceArgs {
 }
 
 pub async fn execute(args: ServiceArgs) -> anyhow::Result<()> {
-    println!("🛠️ Generating service: {}", args.name);
+    println!(" Generating service: {}", args.name);
     // Your service generation logic here
     Ok(())
 }

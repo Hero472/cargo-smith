@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed command name from `cargo mold` to `cargo-mold` in documentation
 
+### Tweaks
+- There is no more emojis in the code :)
+
 ## [0.2.1] - 2025-09-29
 
 ### Fixed

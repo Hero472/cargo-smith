@@ -1,7 +1,9 @@
-use anyhow::Result;
-use async_trait::async_trait;
+use crate::templates::{template_engine::TemplateEngine, Template, TemplateType};
 
-use crate::templates::Template;
+use anyhow::Result;
+use std::path::Path;
+use tokio::fs;
+use async_trait::async_trait;
 
 pub struct NestJSTemplate;
 
@@ -16,6 +18,31 @@ impl Template for NestJSTemplate {
     }
 
     async fn generate(&self, project_name: &str) -> Result<()> {
-        todo!()
+        println!("Using Nestjs Rust Template");
+
+        create_project_structure(project_name).await?;
+
+        let files = [("some", "some")];
+
+        for (output_path, file_content) in files {
+            TemplateEngine::generate_from_template(
+                project_name,
+                output_path,
+                file_content,
+                &TemplateType::Nestjs
+            ).await?;
+        }
+
+        generate_mod_files(project_name).await?;
+
+        Ok(())
     }
+}
+
+async fn create_project_structure(project_name: &str) -> Result<()> {
+    todo!()
+}
+
+async fn generate_mod_files(project_name: &str) -> Result<()> {
+    todo!()
 }

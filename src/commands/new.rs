@@ -10,14 +10,14 @@ pub struct NewArgs {
 }
 
 pub async fn execute(args: NewArgs) -> Result<()> {
-    println!("🚀 Creating new project: {}", args.project_name);
+    println!("Creating new project: {}", args.project_name);
 
     TemplateType::create(&args.template_type)
         .generate(&args.project_name)
         .await?;
 
-    println!("✅ Project '{}' created successfully!", args.project_name);
-    println!("📂 Next steps:");
+    println!("Project '{}' created successfully!", args.project_name);
+    println!("Next steps:");
     println!("   cd {}", args.project_name);
     println!("   cargo run");
 

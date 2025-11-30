@@ -7,7 +7,7 @@ pub struct ControllerArgs {
 }
 
 pub async fn execute(args: ControllerArgs) -> anyhow::Result<()> {
-    println!("🎮 Generating controller: {}", args.name);
+    println!("Generating controller: {}", args.name);
     // Your controller generation logic here
     Ok(())
 }

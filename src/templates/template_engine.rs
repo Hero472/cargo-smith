@@ -17,7 +17,7 @@ impl TemplateEngine {
         name: &str,
         output_path: &str,
         template_content: &str,
-        template_type: TemplateType
+        template_type: &TemplateType
     ) -> Result<()> {
 
         let config: CargoToml = toml::from_str(CARGO_TOML)?;

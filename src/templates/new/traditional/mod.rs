@@ -1,8 +1,7 @@
-use crate::templates::{template_engine::TemplateEngine, Template, TemplateType};
+use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}};
+
 
 use anyhow::Result;
-use std::path::Path;
-use tokio::fs;
 use async_trait::async_trait;
 
 pub struct TraditionalTemplate;
@@ -34,9 +33,17 @@ impl Template for TraditionalTemplate {
     }
 
     async fn generate(&self, project_name: &str) -> Result<()> {
-        println!("🏗️  Using Traditional Rust template...");
+        println!("Using Traditional Rust template...");
         
-        create_project_structure(project_name).await?;
+        let folders = [
+            "src/routes",
+            "src/models",
+            "src/handlers",
+            "src/server",
+            "src/utils"
+        ];
+
+        create_project_structure(project_name, &folders)?;
         
         let files = [
                 ("Cargo.toml", CARGO_TOML_TPL),
@@ -49,48 +56,27 @@ impl Template for TraditionalTemplate {
                 ("src/handlers/handlers.rs", HANDLERS_HANDLERS_TPL)
             ];
 
+        
+
         for (output_path, file_content) in files {
             TemplateEngine::generate_from_template(
                 project_name,
                 output_path,
                 file_content,
-                TemplateType::Traditional
+                &TemplateType::Traditional
             ).await?;
         }
 
-        generate_mod_files(project_name).await?;
+        let mod_files = [
+            ("src/models/mod.rs", MODELS_MOD_RS_TPL),
+            ("src/utils/mod.rs", UTILS_MOD_RS_TPL),
+            ("src/handlers/mod.rs", HANDLERS_MOD_RS_TPL),
+            ("src/routes/mod.rs", ROUTES_MOD_RS_TPL),
+            ("src/server/mod.rs", SERVER_MOD_RS_TPL),
+        ];
+
+        generate_mod_files(project_name, &mod_files, &TemplateType::Traditional).await?;
 
         Ok(())
     }
-}
-
-async fn create_project_structure(project_name: &str) -> Result<()> {
-    let project_path = Path::new(project_name);
-    fs::create_dir_all(project_path.join("src/routes")).await?;
-    fs::create_dir_all(project_path.join("src/models")).await?;
-    fs::create_dir_all(project_path.join("src/handlers")).await?;
-    fs::create_dir_all(project_path.join("src/server")).await?;
-    fs::create_dir_all(project_path.join("src/utils")).await?;
-    Ok(())
-}
-
-async fn generate_mod_files(project_name: &str) -> Result<()> {
-    let mod_files = [
-        ("src/models/mod.rs", MODELS_MOD_RS_TPL),
-        ("src/utils/mod.rs", UTILS_MOD_RS_TPL),
-        ("src/handlers/mod.rs", HANDLERS_MOD_RS_TPL),
-        ("src/routes/mod.rs", ROUTES_MOD_RS_TPL),
-        ("src/server/mod.rs", SERVER_MOD_RS_TPL),
-    ];
-
-    for (output_path, file_content) in mod_files {
-        TemplateEngine::generate_from_template(
-            project_name,
-            output_path,
-            file_content,
-            TemplateType::Traditional
-        ).await?;
-    }
-
-    Ok(())
 }

@@ -21,7 +21,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Create a new project
-    New(commands::new::NewArgs),
+    New,
     /// Generate code components (shortcut: g)
     #[command(name = "g")]
     Generate(GenerateArgs),
@@ -54,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         run_interactive().await
     } else {
         match cli.command.unwrap() {
-            Commands::New(args) => commands::new::execute(args).await,
+            Commands::New => create_new_project_interactive().await,
             Commands::Generate(args) => match args.command {
                 GenerateCommands::Resource(args) => commands::resource::execute(args).await,
                 GenerateCommands::Service(args) => commands::service::execute(args).await,
@@ -68,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
 async fn run_interactive() -> anyhow::Result<()> {
     let theme = ColorfulTheme::default();
     
-    println!("🚀 Welcome to cargo-mold interactive mode!");
+    println!("Welcome to cargo-mold interactive mode!");
     println!("Let's generate some code step by step...\n");
     
     // Step 1: Choose action
@@ -88,7 +88,7 @@ async fn run_interactive() -> anyhow::Result<()> {
 async fn create_new_project_interactive() -> anyhow::Result<()> {
     let theme = ColorfulTheme::default();
     
-    println!("\n📁 Creating a new project...");
+    println!("\nCreating a new project...");
     
     let project_name: String = Input::with_theme(&theme)
         .with_prompt("Project name")
@@ -130,7 +130,7 @@ async fn create_new_project_interactive() -> anyhow::Result<()> {
     //     .map(|&i| features[i])
     //     .collect();
     
-    println!("\n🎯 Summary:");
+    println!("\nSummary:");
     println!("  Project: {}", project_name);
     println!("  Template: {}", template);
     // println!("  Features: {}", selected_features.join(", "));
