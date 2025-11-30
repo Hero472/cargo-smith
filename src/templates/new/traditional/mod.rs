@@ -1,4 +1,4 @@
-use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}};
+use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}, utils::utils::{create_project_structure, generate_mod_files}};
 
 
 use anyhow::Result;
@@ -6,13 +6,13 @@ use async_trait::async_trait;
 
 pub struct TraditionalTemplate;
 
-const CARGO_TOML_TPL: &str = include_str!("../traditional/cargo_toml.tpl");
-const MAIN_RS_TPL: &str = include_str!("../traditional/main_rs.tpl");
+const CARGO_TOML_TPL: &str = include_str!("../../cargo_toml.tpl");
+const MAIN_RS_TPL: &str = include_str!("../../main_rs.tpl");
 const LIB_RS_TPL: &str = include_str!("../traditional/lib_rs.tpl");
 const CARGO_MOLD_TPL: &str = include_str!("../../cargo_mold.tpl");
-const ENV_EXAMPLE_TPL: &str = include_str!("../traditional/env_example.tpl");
+const ENV_EXAMPLE_TPL: &str = include_str!("../../env_example.tpl");
 const ROUTES_ROUTES_TPL: &str = include_str!("../traditional/routes_routes_rs.tpl");
-const SERVER_SERVER_TPL: &str = include_str!("../traditional/server_server_rs.tpl");
+const SERVER_SERVER_TPL: &str = include_str!("../../server_server_rs.tpl");
 const HANDLERS_HANDLERS_TPL: &str = include_str!("../traditional/handlers_handlers_rs.tpl");
 
 const MODELS_MOD_RS_TPL: &str = include_str!("../traditional/mod_files/models_mod_rs.tpl");
@@ -46,15 +46,15 @@ impl Template for TraditionalTemplate {
         create_project_structure(project_name, &folders)?;
         
         let files = [
-                ("Cargo.toml", CARGO_TOML_TPL),
-                ("src/main.rs", MAIN_RS_TPL),
-                ("src/lib.rs", LIB_RS_TPL),
-                (".cargo-mold", CARGO_MOLD_TPL ),
-                ("env-example", ENV_EXAMPLE_TPL),
-                ("src/routes/routes.rs", ROUTES_ROUTES_TPL),
-                ("src/server/server.rs", SERVER_SERVER_TPL),
-                ("src/handlers/handlers.rs", HANDLERS_HANDLERS_TPL)
-            ];
+            ("Cargo.toml", CARGO_TOML_TPL),
+            ("src/main.rs", MAIN_RS_TPL),
+            ("src/lib.rs", LIB_RS_TPL),
+            (".cargo-mold", CARGO_MOLD_TPL ),
+            ("env-example", ENV_EXAMPLE_TPL),
+            ("src/routes/routes.rs", ROUTES_ROUTES_TPL),
+            ("src/server/server.rs", SERVER_SERVER_TPL),
+            ("src/handlers/handlers.rs", HANDLERS_HANDLERS_TPL)
+        ];
 
         
 

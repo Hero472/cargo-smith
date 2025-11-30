@@ -1,2 +1,2 @@
 pub mod conversions;
-pub mod funcs;
+pub mod utils;
