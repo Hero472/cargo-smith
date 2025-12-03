@@ -1,4 +1,4 @@
-# .cargo-mold
+# .cargo-smith
 [project]
 name = "{{name}}"
 mold_version = "0.3.0"

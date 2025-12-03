@@ -1,6 +1,4 @@
-use std::{fs, path::{Path, PathBuf}};
-
-use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}};
+use crate::{templates::{Template, TemplateType, template_engine::TemplateEngine}, utils::{create_project_structure, generate_mod_files}};
 
 
 use anyhow::Result;
@@ -11,7 +9,7 @@ pub struct TraditionalTemplate;
 const CARGO_TOML_TPL: &str = include_str!("../../cargo_toml.tpl");
 const MAIN_RS_TPL: &str = include_str!("../../main_rs.tpl");
 const LIB_RS_TPL: &str = include_str!("../traditional/lib_rs.tpl");
-const CARGO_MOLD_TPL: &str = include_str!("../../cargo_mold.tpl");
+const CARGO_SMITH_TPL: &str = include_str!("../../cargo_smith.tpl");
 const ENV_EXAMPLE_TPL: &str = include_str!("../../env_example.tpl");
 const ROUTES_ROUTES_TPL: &str = include_str!("../traditional/routes_routes_rs.tpl");
 const SERVER_SERVER_TPL: &str = include_str!("../../server_server_rs.tpl");
@@ -51,7 +49,7 @@ impl Template for TraditionalTemplate {
             ("Cargo.toml", CARGO_TOML_TPL),
             ("src/main.rs", MAIN_RS_TPL),
             ("src/lib.rs", LIB_RS_TPL),
-            (".cargo-mold", CARGO_MOLD_TPL ),
+            (".cargo-smith", CARGO_SMITH_TPL ),
             ("env-example", ENV_EXAMPLE_TPL),
             ("src/routes/routes.rs", ROUTES_ROUTES_TPL),
             ("src/server/server.rs", SERVER_SERVER_TPL),
@@ -81,34 +79,4 @@ impl Template for TraditionalTemplate {
 
         Ok(())
     }
-}
-
-fn create_project_structure(
-    project_name: &str,
-    dirs: &[&str],
-) -> Result<()> {
-    let base = Path::new(project_name);
-
-    for dir in dirs {
-        let full_path: PathBuf = base.join(dir);
-        fs::create_dir_all(&full_path)?;
-    }
-
-    Ok(())
-}
-
-async fn generate_mod_files(
-    project_name: &str,
-    files: &[(&str, &str)],
-    template: &TemplateType
-) -> Result<()> {
-    for (path, content) in files {
-        TemplateEngine::generate_from_template(
-            project_name,
-            path,
-            content,
-            template,
-        ).await?;
-    }
-    Ok(())
 }

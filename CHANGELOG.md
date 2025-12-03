@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-12-2
+
 ### Features
 - **New template system**: Completely rewrote codebase to support modular, file-based templates
 - **Template engine**: New engine handles variable substitution and file generation
@@ -15,10 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Maintainability**: Templates can now be edited without recompiling the binary
 
 ### Fixed
-- Fixed command name from `cargo mold` to `cargo-mold` in documentation
+- Fixed command name from `cargo mold` to `cargo-smith` in documentation
 
 ### Tweaks
 - There is no more emojis in the code :)
+- No more cargo-mold, now it's cargo-smith
 
 ## [0.2.1] - 2025-09-29
 

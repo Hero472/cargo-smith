@@ -5,9 +5,10 @@ use crate::templates::TemplateType;
 
 mod commands;
 mod templates;
+mod utils;
 
 #[derive(Parser)]
-#[command(name = "cargo-mold")]
+#[command(name = "cargo-smith")]
 #[command(about = "NestJS-inspired code generator for Rust", long_about = None)]
 struct Cli {
     #[command(subcommand)]
@@ -68,7 +69,7 @@ async fn main() -> anyhow::Result<()> {
 async fn run_interactive() -> anyhow::Result<()> {
     let theme = ColorfulTheme::default();
     
-    println!("Welcome to cargo-mold interactive mode!");
+    println!("Welcome to cargo-smith interactive mode!");
     println!("Let's generate some code step by step...\n");
     
     // Step 1: Choose action
@@ -105,7 +106,7 @@ async fn create_new_project_interactive() -> anyhow::Result<()> {
 
     let templates = &[
         TemplateType::Traditional,
-        TemplateType::Nestjs,
+        // TemplateType::Nestjs,
         // "web-api",
         // "cli-tool",
         // "library",

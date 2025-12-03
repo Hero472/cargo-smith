@@ -16,7 +16,7 @@ const ROUTES_RS_TPL: &str = include_str!("../templates/resource/traditional/rout
 
 pub async fn execute(args: ResourceArgs) -> anyhow::Result<()> {
 
-    if !Path::new(".cargo-mold").exists() {
+    if !Path::new(".cargo-smith").exists() {
         bail!(
             "Not a cargo-mold project.\n\
              Run this command in a project created with `cargo mold new`\n\
@@ -81,14 +81,14 @@ async fn update_mod_file(file_path: &str, module_declaration: &str) -> Result<()
 
 async fn update_resource_cargo_mold(name: String) -> Result<()> {
     
-    let content = fs::read_to_string(".cargo-mold").await?;
+    let content = fs::read_to_string(".cargo-smith").await?;
 
     let mut config: CargoMold = toml::from_str(&content)?;
 
     if !config.generated.resources.contains(&name) {
         config.generated.resources.push(name);
         let updated_content = toml::to_string_pretty(&config)?;
-        fs::write(".cargo-mold", updated_content).await?;
+        fs::write(".cargo-smith", updated_content).await?;
     }
     Ok(())
 } 
