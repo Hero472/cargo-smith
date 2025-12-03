@@ -1,7 +1,7 @@
-//! {{name_pascal_case}} module.
-//!
-//! Generated on {{now}}.
-//! This is the NestJS-style module for the "{{name}}" feature.
+// {{name_pascal_case}} module.
+//
+// Generated on {{now}}.
+// This is the NestJS-style module for the "{{name}}" feature.
 
 use actix_web::{web};
 

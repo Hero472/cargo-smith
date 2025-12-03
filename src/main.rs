@@ -106,7 +106,7 @@ async fn create_new_project_interactive() -> anyhow::Result<()> {
 
     let templates = &[
         TemplateType::Traditional,
-        // TemplateType::Nestjs,
+        TemplateType::Nestjs,
         // "web-api",
         // "cli-tool",
         // "library",

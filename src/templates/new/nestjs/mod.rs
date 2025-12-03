@@ -10,10 +10,10 @@ const MAIN_RS_TPL: &str = include_str!("../../main_rs.tpl");
 const CARGO_SMITH_TPL: &str = include_str!("../../cargo_smith.tpl");
 const ENV_EXAMPLE_TPL: &str = include_str!("../../env_example.tpl");
 const LIB_RS_TPL: &str = include_str!("../nestjs/lib_rs.tpl");
-const SERVER_SERVER_RS_TPL: &str = include_str!("../../server_server_rs.tpl");
-const MODULE_RS_TPL: &str = include_str!("./module_rs.tpl");
-const SERVICE_RS_TPL: &str = include_str!("./service_rs.tpl");
-const CONTROLLER_RS_TPL: &str = include_str!("./controller_rs.tpl");
+const SERVER_SERVER_RS_TPL: &str = include_str!("./server_server_rs.tpl");
+const APP_MODULE_RS_TPL: &str = include_str!("./app_module_rs.tpl");
+const APP_SERVICE_RS_TPL: &str = include_str!("./app_service_rs.tpl");
+const APP_CONTROLLER_RS_TPL: &str = include_str!("./app_controller_rs.tpl");
 
 const APP_MOD_RS_TPL: &str = include_str!("../nestjs/mod_files/app_mod_rs.tpl");
 const COMMON_MOD_RS_TPL: &str = include_str!("../nestjs/mod_files/common_mod_rs.tpl");
@@ -61,9 +61,9 @@ impl Template for NestJSTemplate {
             ("src/server/server.rs", SERVER_SERVER_RS_TPL),
 
             // app
-            ("src/app/app.module.rs", MODULE_RS_TPL),
-            ("src/app/app.controller.rs", CONTROLLER_RS_TPL),
-            ("src/app/app.service.rs", SERVICE_RS_TPL),
+            ("src/app/app_module.rs", APP_MODULE_RS_TPL),
+            ("src/app/app_controller.rs", APP_CONTROLLER_RS_TPL),
+            ("src/app/app_service.rs", APP_SERVICE_RS_TPL),
         ];
 
         for (output_path, file_content) in files {
@@ -75,6 +75,7 @@ impl Template for NestJSTemplate {
             ).await?;
         }
 
+
         let mod_files = [
             ("src/server/mod.rs", SERVER_MOD_RS_TPL),
             ("src/app/mod.rs", APP_MOD_RS_TPL),
@@ -82,7 +83,7 @@ impl Template for NestJSTemplate {
             ("src/config/mod.rs", CONFIG_MOD_RS_TPL),
             ("src/modules/mod.rs", MODULES_MOD_RS_TPL),
             ("src/common/guards/mod.rs", EMPTY_MOD_RS_TPL),
-            ("src/common/filter/mod.rs", EMPTY_MOD_RS_TPL),
+            ("src/common/filters/mod.rs", EMPTY_MOD_RS_TPL),
             ("src/common/interceptors/mod.rs", EMPTY_MOD_RS_TPL),
             ("src/common/utils/mod.rs", EMPTY_MOD_RS_TPL)
         ];
@@ -92,3 +93,5 @@ impl Template for NestJSTemplate {
         Ok(())
     }
 }
+
+// TODO: I need to do the env file and the settings file

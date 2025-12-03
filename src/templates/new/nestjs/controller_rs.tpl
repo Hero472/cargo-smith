@@ -1,7 +1,7 @@
-//! {{name_pascal_case}} controller.
-//!
-//! Generated on {{now}}.
-//! This acts like a NestJS Controller for the "{{name}}" module.
+// {{name_pascal_case}} controller.
+//
+// Generated on {{now}}.
+// This acts like a NestJS Controller for the "{{name}}" module.
 
 use actix_web::{get, post, web, HttpResponse};
 use super::{{name_snake_case}}_service::{{name_pascal_case}}Service;
