@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2025-12-2
 
-### Features
+### Added
 - **New template system**: Completely rewrote codebase to support modular, file-based templates
 - **Template engine**: New engine handles variable substitution and file generation
 - **Future-ready**: Architecture now supports multiple template types
+- **NestJS-style project generation**: Added a new feature that lets you generate a project using a NestJS-like modular design
 
-### Refactor
+### Changed
 - **Code organization**: Separated all template content from Rust code and utils folder is now a file
 - **Maintainability**: Templates can now be edited without recompiling the binary
 
