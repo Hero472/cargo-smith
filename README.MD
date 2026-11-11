@@ -13,7 +13,7 @@ Inspired by the scalability of [NestJS](https://nestjs.com/), built with the pow
 - **Modular by Design** — organizes code by domain features, so projects stay maintainable from microservice to enterprise.
 - **Zero-Boilerplate** — generate a feature (controller, service, model, routes) in one command.
 - **Developer Experience** — automatic Actix-Web `ServiceConfig` injection; no manual route imports.
-- **Production-Ready Foundations** — JWT auth, role-based guards, MongoDB helpers, pagination, validation, and structured responses out of the box.
+- **Solid Foundations** — JWT auth, role-based guards, MongoDB helpers, pagination, validation, and structured responses out of the box.
 - **Optimized** — Rust-level performance with clean binary footprints.
 
 ## Installation
@@ -162,9 +162,14 @@ Rust 1.85+ (2024 edition).
 
 - [x] Modular template (feature-based organization)
 - [x] Automatic feature registration (`features/mod.rs`)
+- [x] JWT authentication scaffolding (`--auth`)
+- [x] Role-based access control (guards, AnyOf, custom roles)
+- [x] CORS, health check, and request logging in generated server
+- [x] Local development mode (`--local` path dependency)
 - [ ] CRUD generation (instant database integration)
 - [ ] Routing framework (macro-based routing)
 - [ ] Additional templates (web-api, cli-tool, library, microservice)
+- [ ] Postgres/SQLite support (currently MongoDB only)
 
 ## Contributing
 
