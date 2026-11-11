@@ -11,7 +11,7 @@ Inspired by the scalability of [NestJS](https://nestjs.com/), built with the pow
 ## Why cargo-smith?
 
 - **Modular by Design** — organizes code by domain features, so projects stay maintainable from microservice to enterprise.
-- **Zero-Boilerplate** — generate a feature (controller, service, model, routes) in one command.
+- **Zero-Boilerplate** — generate a full CRUD feature (model, DTOs, service, controller, routes) in one command.
 - **Developer Experience** — automatic Actix-Web `ServiceConfig` injection; no manual route imports.
 - **Solid Foundations** — JWT auth, role-based guards, MongoDB helpers, pagination, validation, and structured responses out of the box.
 - **Optimized** — Rust-level performance with clean binary footprints.
@@ -166,7 +166,7 @@ Rust 1.85+ (2024 edition).
 - [x] Role-based access control (guards, AnyOf, custom roles)
 - [x] CORS, health check, and request logging in generated server
 - [x] Local development mode (`--local` path dependency)
-- [ ] CRUD generation (instant database integration)
+- [x] CRUD generation (full Create/Read/Update/Delete scaffolding)
 - [ ] Routing framework (macro-based routing)
 - [ ] Additional templates (web-api, cli-tool, library, microservice)
 - [ ] Postgres/SQLite support (currently MongoDB only)
