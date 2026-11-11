@@ -27,7 +27,7 @@ pub use common::response::ApiResponse;
 // Guards & Roles
 pub use common::guards::{AuthGuard, GuardClaims};
 pub use common::guards::{RequireAdmin, RequireAnyRole, RequireAuth, RequireGuest, RequireUser, HasRole, AnyOf};
-pub use common::roles::{Admin, User, Guest, DefaultRoles};
+pub use common::roles::{Admin, User, Guest, DefaultRoles, Role};
 
 // Pagination
 pub use common::extractors::pagination::{PaginatedResponse, PaginationQuery};

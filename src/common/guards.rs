@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use serde_json::Value;
 use crate::auth::claims::Claims;
 use crate::common::errors::AppError;
-use crate::common::roles::RequiredRole;
+use crate::common::roles::{RequiredRole, Role};
 
 
 /// A type that specifies a role requirement for `AuthGuard`.
@@ -22,11 +22,11 @@ pub trait RoleRequirement {
 
 impl<T: RequiredRole> RoleRequirement for T {
     fn is_satisfied_by(role_str: &str) -> bool {
-        role_str == T::ROLE
+        role_str == T::ROLE.as_str()
     }
 
     fn requirement() -> &'static str {
-        T::ROLE
+        T::ROLE.as_str()
     }
 }
 
@@ -120,23 +120,30 @@ pub trait GuardClaims {
     }
 
     /// Returns `true` if the authenticated user has the given role.
-    fn has_role(&self, role: &str) -> bool {
-        self.role_str().map(|r| r == role).unwrap_or(false)
+    fn has_role(&self, role: Role) -> bool {
+        self.role_str().map(|r| r == role.as_str()).unwrap_or(false)
     }
 
     /// Convenience check for the `admin` role.
     fn is_admin(&self) -> bool {
-        self.has_role("admin")
+        self.has_role(Role::ADMIN)
     }
 
     /// Convenience check for the `user` role.
     fn is_user(&self) -> bool {
-        self.has_role("user")
+        self.has_role(Role::USER)
     }
 
     /// Convenience check for the `guest` role.
     fn is_guest(&self) -> bool {
-        self.has_role("guest")
+        self.has_role(Role::GUEST)
+    }
+
+    /// Returns `true` if the authenticated user has the given role string.
+    ///
+    /// Use this for dynamic role checks (e.g., roles loaded from a database).
+    fn has_role_str(&self, role: &str) -> bool {
+        self.role_str().map(|r| r == role).unwrap_or(false)
     }
 }
 
@@ -214,7 +221,7 @@ macro_rules! create_auth_aliases {
 
 #[cfg(test)]
 mod tests {
-    use crate::{common::roles::{Admin, DefaultRoles, Guest, Role, User}, define_custom_roles};
+    use crate::{common::roles::{Admin, DefaultRoles, Guest, Role, RoleType, User}, define_custom_roles};
 
     use super::*;
     use actix_web::test::TestRequest;
@@ -247,9 +254,9 @@ mod tests {
 
     #[test]
     fn default_required_role_constants() {
-        assert_eq!(Admin::ROLE, "admin");
-        assert_eq!(User::ROLE, "user");
-        assert_eq!(Guest::ROLE, "guest");
+        assert_eq!(Admin::ROLE.as_str(), "admin");
+        assert_eq!(User::ROLE.as_str(), "user");
+        assert_eq!(Guest::ROLE.as_str(), "guest");
     }
 
     define_custom_roles! {
@@ -264,8 +271,8 @@ mod tests {
         use TestRoles::*;
         assert_eq!(Editor.as_str(), "editor");
         assert_eq!(Viewer.as_str(), "viewer");
-        assert_eq!(EditorRole::ROLE, "editor");
-        assert_eq!(ViewerRole::ROLE, "viewer");
+        assert_eq!(EditorRole::ROLE.as_str(), "editor");
+        assert_eq!(ViewerRole::ROLE.as_str(), "viewer");
     }
 
     #[actix_web::test]

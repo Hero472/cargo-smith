@@ -27,7 +27,7 @@ impl<R: RequiredRole + 'static> FromRequest for RoleGuard<R> {
 
         let role_matches = claims.data.get("role")
             .and_then(|v| v.as_str())
-            .map(|r| r == R::ROLE)
+            .map(|r| r == R::ROLE.as_str())
             .unwrap_or(false);
 
         if role_matches {
