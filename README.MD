@@ -1,134 +1,188 @@
 # cargo-smith
 
-A high-performance CLI tool for scaffolding Modular Rust & Actix Web applications.
+[![Crates.io](https://img.shields.io/crates/v/cargo-smith.svg)](https://crates.io/crates/cargo-smith)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)](https://www.rust-lang.org)
 
-Inspired by the scalability of NestJS, built with the power of Rust.
+A high-performance CLI tool for scaffolding modular Rust & Actix Web applications.
 
-## The modular Vision
-
-`cargo-smith` is transitioning to a `Feature-First` architecture. Instead of flat folders for all controllers or models, we organize code by `Domain Features`. This ensures your project stays maintainable as it grows from a microservice to an enterprise system.
+Inspired by the scalability of [NestJS](https://nestjs.com/), built with the power of Rust.
 
 ## Why cargo-smith?
 
-- Modular by Design: Automatically registers new features in a central registry.
-
-- Zero-Boilerplate: Generate a feature with Controller, Service, Model, and Routes in one command.
-
-- Developer Experience: Automated Actix-Web ServiceConfig injection—no more manual route imports.
-
-- Optimized: Designed for Rust-level performance and clean binary footprints.
+- **Modular by Design** — organizes code by domain features, so projects stay maintainable from microservice to enterprise.
+- **Zero-Boilerplate** — generate a feature (controller, service, model, routes) in one command.
+- **Developer Experience** — automatic Actix-Web `ServiceConfig` injection; no manual route imports.
+- **Production-Ready Foundations** — JWT auth, role-based guards, MongoDB helpers, pagination, validation, and structured responses out of the box.
+- **Optimized** — Rust-level performance with clean binary footprints.
 
 ## Installation
+
+### From crates.io
 
 ```bash
 cargo install cargo-smith
 ```
 
+### From source
+
+```bash
+git clone https://github.com/Hero472/cargo-smith.git
+cd cargo-smith
+cargo install --path .
+```
+
+**Requirements:** Rust 1.85+ (2024 edition).
+
 ## Usage
 
-### 1. Create a New Project
+### Create a new project
 
 ```bash
-# Create a new Actix Web project
+# Interactive mode (prompts for name and template)
 cargo-smith new
 
-# See all available commands
-cargo-smith --help
+# Non-interactive
+cargo-smith new my-project --template-type modular
 ```
 
-This generates a project with the `Modular` template, including a `.cargo-smith` configuration file to track your project state.
+Generated projects use the **Modular (Actix-Web)** template by default and include a `.cargo-smith` metadata file tracking your project state.
 
-### 2. Generate a New Feature
+### Add a feature
 
 ```bash
-# Adds a 'users' module with full boilerplate
-cargo-smith feature users
+# Adds a 'users' module with controller, service, model, and routes
+cargo-smith add feature users
+
+# Shortcut aliases
+cargo-smith g feature users
+cargo-smith generate feature users
 ```
 
-## Generated Project Structure
+### Help
+
+```bash
+cargo-smith --help
+cargo-smith --version
+```
+
+## Generated project structure
 
 ```
 my-project/
-├── .cargo-smith           # Project metadata and feature registry
+├── .cargo-smith            # Project metadata and feature registry
+├── .env.example            # Environment configuration template
+├── Cargo.toml
 ├── src/
-│   ├── main.rs            # Entry point
-│   ├── lib.rs             # Library root
-│   ├── server/            # Server configuration
-│   │   ├── server.rs      # Server start
-│   ├── utils/             # Shared utilities
-│   └── features/          # Domain Logic (The Core)
-│       ├── mod.rs         # Central Registry [SMITH-MOD]
-│       └── users/         # Generated Feature
-│           ├── mod.rs     # Feature Entry & Init
+│   ├── main.rs             # Entry point
+│   ├── lib.rs              # Library root
+│   ├── server/
+│   │   └── server.rs       # HTTP server startup (127.0.0.1:8080)
+│   ├── utils/              # Shared utilities
+│   └── features/           # Domain logic (the core)
+│       ├── mod.rs          # Central registry [SMITH-MOD]
+│       └── users/          # Generated feature
+│           ├── mod.rs      # Feature entry & init
 │           ├── controller.rs
 │           ├── service.rs
 │           ├── model.rs
 │           └── routes.rs
 ```
 
-## The Roadmap
+Each generated feature is automatically registered in `features/mod.rs` via marker-based injection (`[SMITH-MOD]`, `[SMITH-INIT]`), so routes are wired up without manual edits.
 
-[x] Modular Template: Feature-based organization
-[x] Automatic Registration: Smart code injection into `features/mod.rs`
-[] CRUD Generation: Instant database integration for features
-[] Routing Framework: Advanced macro-based routing for cleaner controllers
+## What's included in generated apps
 
-## Resource Generation
+- **Actix Web 4** with Tokio runtime
+- **Feature-based modules** for routes, handlers, and server configuration
+- **JWT Authentication** with middleware protection (`JwtMiddleware`)
+- **Role-based guards** (`RequireAdmin`, `RequireUser`, `RequireGuest`, `AnyOf`)
+- **MongoDB helpers** (`MongoCollection`, `Db`, pagination, transactions)
+- **Validated JSON** extractor (`ValidatedJson<T>` with `validator`)
+- **Pagination** (`PaginationQuery`, `PaginatedResponse`)
+- **Standardized responses** (`ApiResponse<T>`)
+- **Error handling** (`AppError` with HTTP status mapping)
+- **Environment config** via `dotenvy`
 
-Create complete CRUD APIs in seconds:
+## Architecture
+
+cargo-smith itself is split into a library (`src/lib.rs`) and a thin binary (`src/main.rs`):
+
+```
+src/
+├── main.rs          # CLI parsing + interactive prompts
+├── lib.rs           # Public API re-exports
+├── commands/        # `new`, `feature` command handlers
+├── templates/       # Template engine + Modular template
+│   └── modular/     # generate.rs, feature.rs (with path validation)
+├── auth/            # AuthService (JWT, bcrypt, AES-GCM)
+├── common/          # errors, guards, roles, middleware, extractors, response
+├── config/          # Environment configuration
+├── database/        # MongoDB collection helpers
+└── utils/           # String helpers (to_pascal_case, etc.)
+```
+
+Feature names are validated (`^[a-z][a-z0-9_-]*$`) to prevent path traversal and keep generated module names valid.
+
+## Development
+
+### Build
 
 ```bash
-# Generate a users resource with full CRUD operations
-cargo-smith add feature users
-
-# This creates:
-# - Model (src/models/user.rs)
-# - Handlers (src/handlers/user_handlers.rs)  
-# - Routes (src/routes/user_routes.rs)
-# - Automatic route registration
-
-# Available endpoints:
-# GET    /api/users
-# POST   /api/users
-# GET    /api/users/{id}
-# PUT    /api/users/{id}
-# DELETE /api/users/{id}
+cargo build
 ```
 
-## JWT Authentication
+### Run locally
 
-Built-in authentication system:
-
-```rust
-use cargo_smith::auth::AuthService;
-use cargo_smith::jwt::JwtMiddleware;
-
-// Create auth service
-let auth_service = AuthService::new("secret".to_string());
-
-// Create JWT middleware
-let jwt_middleware = JwtMiddleware::new("secret".to_string());
-
-// Use in Actix Web app
-App::new()
-    .wrap(jwt_middleware)
-    .route("/protected", web::get().to(protected_handler))
+```bash
+cargo run -- new my-test-project
 ```
 
-## What's Included
+### Test
 
-- **Actix Web 4.4** with Tokio runtime
-- **Structured modules** for routes, handlers, and server configuration
-- **JWT Authentication** with middleware protection
-- **Resource Generation** for rapid CRUD API development
-- **Environment-based configuration** with dotenvy
-- **JSON response** examples
-- **Production-ready project structure**
+```bash
+cargo test          # unit + integration tests
+cargo test --doc    # doctests
+cargo clippy        # lint (correctness = deny)
+cargo fmt --check   # formatting
+```
 
-## Join the Journey
+### MSRV
 
-This is just the beginning! We're building a comprehensive backend framework that combines Rust's performance with developer experience excellence. Your feedback and contributions will help shape the future of backend development in Rust.
+Rust 1.85+ (2024 edition).
+
+## Security notes
+
+- Generated projects bind to `127.0.0.1:8080` by default — configure `0.0.0.0` and TLS for production.
+- Replace the placeholder `JWT_SECRET` in `.env` before deploying.
+- AES keys are derived via PBKDF2-HMAC-SHA256 (100k iterations). For production, prefer a per-user random salt.
+- Feature names are validated to prevent path traversal.
+
+## Roadmap
+
+- [x] Modular template (feature-based organization)
+- [x] Automatic feature registration (`features/mod.rs`)
+- [ ] CRUD generation (instant database integration)
+- [ ] Routing framework (macro-based routing)
+- [ ] Additional templates (web-api, cli-tool, library, microservice)
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/my-feature`)
+3. Run `cargo fmt`, `cargo clippy`, and `cargo test`
+4. Open a pull request
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for what's new in each version.
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
+
+## Author
+
+Pedro Herrera ([@Hero472](https://github.com/Hero472))

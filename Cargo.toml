@@ -2,6 +2,7 @@
 name = "cargo-smith"
 version = "0.4.0"
 edition = "2024"
+rust-version = "1.85"
 description = "NestJS-inspired code generator for Rust web applications"
 license = "MIT"
 authors = ["Pedro Herrera"]
@@ -35,6 +36,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.149"
 thiserror = "2.0.18"
 bcrypt = "0.19.0"
+pbkdf2 = "0.12"
+tracing = "0.1"
 chrono = "0.4.44"
 jsonwebtoken = "9.3.1"
 base64 = "0.22.1"
@@ -53,3 +56,10 @@ validator = { version = "0.20", features = ["derive"] }
 dotenvy = "0.15.7"
 strum = {version = "0.28.0", features = ["derive"]}
 const_format = "0.2.35"
+
+[lints.clippy]
+correctness = "deny"
+suspicious = "warn"
+style = "warn"
+complexity = "warn"
+perf = "warn"

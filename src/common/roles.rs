@@ -2,23 +2,37 @@ use serde::{Serialize, Deserialize};
 use strum::{VariantNames, EnumString, Display, AsRefStr};
 use std::fmt::Debug;
 
-pub trait Role: 
-    Serialize + for<'de> Deserialize<'de> + 
-    PartialEq + Clone + Send + Sync + Debug + 'static 
+/// A role that can be attached to a user's JWT claims.
+///
+/// Implement this for any type that represents an application role.
+pub trait Role:
+    Serialize + for<'de> Deserialize<'de> + PartialEq + Clone + Send + Sync + Debug + 'static
 {
+    /// Returns the role's string representation (e.g. `"admin"`).
     fn as_str(&self) -> &str;
 }
 
+/// A marker type that declares a single required role string.
+///
+/// Used by [`AuthGuard`] to enforce role-based access control.
+/// Implement this for zero-sized marker structs such as [`Admin`].
 pub trait RequiredRole {
+    /// The role string this marker requires (e.g. `"admin"`).
     const ROLE: &'static str;
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Display, AsRefStr, EnumString, VariantNames)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Display, AsRefStr, EnumString, VariantNames)]
 #[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
+/// The built-in roles shipped with cargo-smith.
+///
+/// Variants serialize as lowercase strings (`"admin"`, `"user"`, `"guest"`).
+/// Use [`Admin`], [`User`], or [`Guest`] as guard markers, and this enum
+/// for the `role` field in JWT claims.
 pub enum DefaultRoles {
-    Admin,
+    #[default]
     User,
+    Admin,
     Guest,
 }
 
@@ -28,21 +42,28 @@ impl Role for DefaultRoles {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Admin;
 impl RequiredRole for Admin { 
-    const ROLE: &'static str = <DefaultRoles as VariantNames>::VARIANTS[0]; 
+    const ROLE: &'static str = "admin"; 
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct User;
 impl RequiredRole for User { 
-    const ROLE: &'static str = <DefaultRoles as VariantNames>::VARIANTS[1]; 
+    const ROLE: &'static str = "user"; 
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Guest;
 impl RequiredRole for Guest { 
-    const ROLE: &'static str = <DefaultRoles as VariantNames>::VARIANTS[2]; 
+    const ROLE: &'static str = "guest"; 
 }
 
+/// Compile-time macro that lowercases an ASCII string literal.
+///
+/// Used internally by [`define_custom_roles!`] to derive role strings from
+/// variant names. Not intended for direct use.
 #[macro_export]
 macro_rules! ascii_lowercase {
     ($s:expr) => {{
@@ -77,6 +98,25 @@ macro_rules! ascii_lowercase {
     }};
 }
 
+/// Defines a custom set of application roles.
+///
+/// Generates an enum implementing [`Role`] and marker structs implementing
+/// [`RequiredRole`] for each variant. Variant names are PascalCase; role
+/// strings are their lowercase form.
+///
+/// # Example
+/// ```
+/// use cargo_smith::define_custom_roles;
+///
+/// define_custom_roles! {
+///     AppRoles {
+///         Editor => EditorRole,
+///         Viewer => ViewerRole,
+///     }
+/// }
+///
+/// // Now use `RequireEditor`-style guards via `AuthGuard::<EditorRole>`
+/// ```
 #[macro_export]
 macro_rules! define_custom_roles {
     ($name:ident { $($variant:ident => $marker:ident),* $(,)? }) => {

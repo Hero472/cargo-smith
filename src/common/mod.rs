@@ -1,3 +1,5 @@
+//! Shared utilities: errors, guards, roles, middleware, extractors, and responses.
+
 pub mod extractors;
 pub mod middleware;
 

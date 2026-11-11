@@ -1,29 +1,28 @@
+//! Application error type with HTTP status code mapping.
+
 use actix_web::{HttpResponse, ResponseError, http::StatusCode};
-use std::fmt;
+use thiserror::Error;
 
 use crate::common::response::ApiResponse;
 
-#[derive(Debug)]
+/// Application-level error type with HTTP status mapping.
+///
+/// Each variant carries a human-readable message and maps to an HTTP
+/// status code via [`ResponseError`].
+#[derive(Debug, Error)]
 pub enum AppError {
+    #[error("{0}")]
     Unauthorized(&'static str),
-    Forbidden(&'static str),
+    #[error("{0}")]
+    Forbidden(String),
+    #[error("{0}")]
     NotFound(String),
+    #[error("{0}")]
     BadRequest(String),
+    #[error("{0}")]
     Internal(String),
-    Database(mongodb::error::Error),
-}
-
-impl fmt::Display for AppError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Unauthorized(msg) => write!(f, "{}", msg),
-            Self::Forbidden(msg) => write!(f, "{}", msg),
-            Self::NotFound(msg) => write!(f, "{}", msg),
-            Self::BadRequest(msg) => write!(f, "{}", msg),
-            Self::Internal(msg) => write!(f, "{}", msg),
-            Self::Database(e) => write!(f, "database error: {}", e),
-        }
-    }
+    #[error("database error: {0}")]
+    Database(#[from] mongodb::error::Error),
 }
 
 impl ResponseError for AppError {
@@ -45,12 +44,5 @@ impl ResponseError for AppError {
         let body = ApiResponse::<()>::with_status(status, self.to_string(), None);
         
         HttpResponse::build(status).json(body)
-    }
-}
-
-// So you can do mongo_result.map_err(AppError::Database)?
-impl From<mongodb::error::Error> for AppError {
-    fn from(e: mongodb::error::Error) -> Self {
-        Self::Database(e)
     }
 }

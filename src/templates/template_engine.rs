@@ -11,6 +11,7 @@ use crate::utils::to_pascal_case;
 
 const CARGO_TOML: &str = include_str!("../../Cargo.toml");
 
+/// Stateless engine for generating project files from templates.
 pub struct TemplateEngine;
 
 impl TemplateEngine {
@@ -70,7 +71,7 @@ impl TemplateEngine {
         let content = template_content
             .replace("{{name}}", name)
             .replace("{{name_snake_case}}", &name.replace("-", "_"))
-            .replace("{{name_pascal_case}}", &to_pascal_case(&name))
+            .replace("{{name_pascal_case}}", &to_pascal_case(name))
             .replace("{{now}}",  &Utc::now().format("%Y-%m-%d").to_string())
             .replace("{{template_type}}", &template_type.to_string())
             .replace("{{cargo_version}}", &config.package.version);

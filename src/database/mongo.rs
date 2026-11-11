@@ -1,8 +1,11 @@
+//! MongoDB collection wrapper with CRUD, pagination, and transaction support.
+
 use mongodb::{Client, ClientSession, Collection, bson::{Bson, Document, doc}};
 use serde::{de::DeserializeOwned, Serialize};
 use futures::TryStreamExt;
 use crate::common::{errors::AppError, extractors::pagination::{PaginatedResponse, PaginationQuery, SortDirection}};
 
+/// Extension trait for converting pagination queries into MongoDB filters and sort documents.
 pub trait MongoPaginationExt {
     fn to_filter(&self, searchable_fields: &[&str]) -> Document;
     fn to_sort(&self) -> Document;
@@ -47,6 +50,7 @@ impl MongoPaginationExt for PaginationQuery {
     }
 }
 
+/// A typed MongoDB collection wrapper with CRUD and pagination helpers.
 pub struct MongoCollection<T>
 where
     T: Serialize + DeserializeOwned + Unpin + Send + Sync,
@@ -58,14 +62,14 @@ impl<T> MongoCollection<T>
 where
     T: Serialize + DeserializeOwned + Unpin + Send + Sync,
 {
-    pub async fn new(uri: &str, db_name: &str, collection_name: &str) -> Self {
+    pub async fn new(uri: &str, db_name: &str, collection_name: &str) -> Result<Self, AppError> {
         let client = Client::with_uri_str(uri)
             .await
-            .expect("Failed to connect to MongoDB");
+            .map_err(AppError::Database)?;
         let collection = client
             .database(db_name)
             .collection::<T>(collection_name);
-        Self { collection }
+        Ok(Self { collection })
     }
 
     pub async fn insert(
@@ -84,7 +88,7 @@ where
 
     pub fn parse_id(&self, id: &str) -> Result<mongodb::bson::oid::ObjectId, AppError> {
         mongodb::bson::oid::ObjectId::parse_str(id)
-            .map_err(|_| AppError::BadRequest("Invalid ID format".into()))
+            .map_err(|_| AppError::BadRequest("invalid ID format".into()))
     }
 
     pub async fn find_by_id(
@@ -100,7 +104,7 @@ where
 
         action.await
             .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound(format!("Entity {} not found", id)))
+            .ok_or_else(|| AppError::NotFound(format!("entity {} not found", id)))
     }
 
     pub async fn find_one(&self, filter: Document) -> Result<T, AppError> {
@@ -108,7 +112,7 @@ where
             .find_one(filter)
             .await
             .map_err(AppError::Database)?
-            .ok_or_else(|| AppError::NotFound("Resource not found".into()))
+            .ok_or_else(|| AppError::NotFound("resource not found".into()))
     }
 
     pub async fn find_all(&self) -> Result<Vec<T>, AppError> {
@@ -195,7 +199,9 @@ where
             .await
             .map_err(AppError::Database)?;
 
-        let mut items = Vec::new();
+        let mut items = Vec::with_capacity(
+            usize::try_from(query.get_limit()).unwrap_or(0).max(0),
+        );
         while let Ok(Some(item)) = cursor.try_next().await {
             items.push(item);
         }
@@ -209,17 +215,18 @@ where
 
 }
 
+/// A MongoDB database connection handle.
 pub struct Db {
     pub client: Client,
     pub db_name: String,
 }
 
 impl Db {
-    pub async fn connect(uri: &str, db_name: &str) -> Self {
+    pub async fn connect(uri: &str, db_name: &str) -> Result<Self, AppError> {
         let client = Client::with_uri_str(uri)
             .await
-            .expect("Failed to connect to MongoDB");
-        Self { client, db_name: db_name.to_string() }
+            .map_err(AppError::Database)?;
+        Ok(Self { client, db_name: db_name.to_string() })
     }
 
     /// Get a typed collection — call this once per handler or store in Data<>

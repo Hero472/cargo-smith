@@ -4,6 +4,7 @@ use serde::de::DeserializeOwned;
 use validator::Validate;
 use crate::common::errors::AppError;
 
+/// JSON extractor that validates the payload using `validator::Validate`.
 pub struct ValidatedJson<T>(pub T);
 
 impl<T> ValidatedJson<T> {

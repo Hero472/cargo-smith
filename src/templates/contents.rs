@@ -11,7 +11,16 @@ pub mod modular {
     pub const MAIN: &str = include_str!("../../tpl/modular/main_server.tpl");
     pub const LIB: &str = include_str!("../../tpl/modular/lib.tpl");
     pub const SERVER: &str = include_str!("../../tpl/modular/server.tpl");
+    pub const SERVER_AUTH: &str = include_str!("../../tpl/modular/server_auth.tpl");
     pub const FEATURE_MOD: &str = include_str!("../../tpl/modular/feature_mod.tpl");
+
+    pub mod auth {
+        pub const MOD: &str = include_str!("../../tpl/modular/auth/mod_rs.tpl");
+        pub const CONTROLLER: &str = include_str!("../../tpl/modular/auth/controller.tpl");
+        pub const SERVICE: &str = include_str!("../../tpl/modular/auth/service.tpl");
+        pub const MODEL: &str = include_str!("../../tpl/modular/auth/model.tpl");
+        pub const ROUTES: &str = include_str!("../../tpl/modular/auth/routes.tpl");
+    }
     
     // Feature-specific templates for modular
     pub mod feature {

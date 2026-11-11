@@ -7,6 +7,11 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 
 use crate::auth::claims::Claims;
 
+/// Actix Web middleware that validates JWT Bearer tokens.
+///
+/// Extracts the token from the `Authorization` header (or `?token=` query
+/// param for WebSocket upgrades), verifies the signature and expiration,
+/// and injects [`Claims`](crate::auth::claims::Claims) into request extensions.
 pub struct JwtMiddleware {
     secret_key: String
 }
@@ -39,6 +44,7 @@ where
     }
 }
 
+/// Per-request service that performs JWT validation.
 pub struct JwtMiddlewareService<S> {
     service: Rc<S>,
     secret_key: String,

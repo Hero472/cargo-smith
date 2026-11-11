@@ -1,9 +1,14 @@
+//! cargo-smith: NestJS-inspired code generator for Rust web applications.
+//!
+//! This crate powers the `cargo-smith` CLI, which scaffolds modular
+//! Actix Web projects and generates feature modules.
+
 pub(crate) mod commands;
 pub(crate) mod templates;
 pub(crate) mod auth;
 pub(crate) mod utils;
 pub(crate) mod database;
-pub(crate) mod common;
+pub mod common;
 pub(crate) mod config;
 
 // Auth & JWT
@@ -27,5 +32,11 @@ pub use common::roles::{Admin, User, Guest, DefaultRoles};
 // Pagination
 pub use common::extractors::pagination::{PaginatedResponse, PaginationQuery};
 
+// Validation
+pub use common::extractors::validated::ValidatedJson;
+
 // Config
 pub use config::Config;
+
+// Utils
+pub use utils::to_pascal_case;

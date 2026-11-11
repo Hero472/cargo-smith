@@ -1,33 +1,45 @@
 use std::error::Error;
 use serde::{Serialize, Deserialize};
 use sha2::{digest::generic_array::GenericArray, Digest, Sha256};
+use pbkdf2::pbkdf2_hmac;
 use base64::Engine;
 use aes_gcm::{aead::{Aead, OsRng}, AeadCore, Aes256Gcm, KeyInit, Nonce};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use chrono::{Utc, Duration};
+use chrono::Utc;
 use bcrypt::{hash as crypt_hash, DEFAULT_COST};
 
 use crate::{DefaultRoles, auth::claims::Claims};
 
-/// Derives a 32‑byte key from a password‑like string using SHA‑256.
+/// Derives a 32‑byte key from a password‑like string using PBKDF2-HMAC-SHA256.
 ///
 /// This is a convenience helper for turning a user‑supplied encryption secret
-/// into a fixed‑size key suitable for AES‑256-GCM.
+/// into a fixed‑size key suitable for AES‑256-GCM. A high iteration count and
+/// a constant salt provide resistance against brute-force and rainbow-table
+/// attacks. Prefer a per-user random salt in production code.
+/// Fixed application salt used for key derivation. A per-user salt would be
+/// preferable, but `AuthService` derives a key from a passphrase without
+/// storing extra state, so a constant salt is used. Combined with a high
+/// iteration count this is a meaningful improvement over a single SHA-256.
+const KEY_DERIVATION_SALT: &[u8] = b"cargo-smith-aes-key-derivation-salt-v1";
+const KEY_DERIVATION_ITERATIONS: u32 = 100_000;
+
 fn derive_key_from_string(key_str: &str) -> [u8; 32] {
-    let hasher = Sha256::new_with_prefix(key_str.as_bytes());
-    hasher.finalize().into()
+    let mut key = [0u8; 32];
+    pbkdf2_hmac::<Sha256>(key_str.as_bytes(), KEY_DERIVATION_SALT, KEY_DERIVATION_ITERATIONS, &mut key);
+    key
 }
 
-/// Service that handles hashing, JWT creation/verification, and AES‑256‑GCM
-/// encryption/decryption.
+/// Service handling password hashing (bcrypt), JWT creation/verification,
+/// and AES-256-GCM encryption/decryption.
 ///
 /// # Fields
 /// * `secret_key` – secret used for signing JWTs (HMAC‑SHA256).
 /// * `encryption_key` – secret from which a 256‑bit AES key is derived.
 ///
-/// Both secrets should be kept private. The struct itself derives
-/// `Serialize` / `Deserialize` for configuration persistence, but note that
-/// this **exposes the secrets in plain text** when serialized – use with care.
+/// # Security
+///
+/// Both secrets are stored in plain text when serialized — use with care.
+/// Do not persist this struct to disk or logs.
 #[derive(Serialize, Deserialize)]
 pub struct AuthService {
     secret_key: String,
@@ -49,16 +61,21 @@ impl AuthService {
         }
     }
 
-    /// Hashes an arbitrary string with SHA‑256 (double‑hashed) and returns
-    /// the hex‑encoded digest.
+    /// Hashes an arbitrary string with SHA-256 and returns the hex‑encoded
+    /// digest.
+    ///
+    /// The input is fed to the hasher twice (once as a prefix and once as an
+    /// update), which is **not** a standard construction and provides no
+    /// additional security over a single hash. This method exists for
+    /// non-security checksum use cases only.
     ///
     /// This is **not** suitable for password storage – see
     /// [`hash_password`](Self::hash_password) for that purpose.
     ///
     /// # Examples
     /// ```
-    /// let digest = AuthService::hash("hello");
-    /// assert_eq!(digest.unwrap().len(), 64);
+    /// let digest = cargo_smith::AuthService::hash("hello").unwrap();
+    /// assert_eq!(digest.len(), 64);
     /// ```
     pub fn hash(input: &str) -> Result<String, Box<dyn Error>> {
         let mut hasher = Sha256::new_with_prefix(input.as_bytes());
@@ -94,11 +111,15 @@ impl AuthService {
     ///
     /// # Examples
     /// ```
+    /// use cargo_smith::AuthService;
+    /// use chrono::Duration;
+    /// let auth = AuthService::new("secret".to_string(), "enc".to_string());
     /// let token = auth.generate_token(
-    ///     "user@example.com".into(),
+    ///     "user@example.com".to_string(),
     ///     serde_json::json!({"role": "admin"}),
-    ///     chrono::Duration::minutes(15),
-    /// );
+    ///     Duration::minutes(15),
+    /// ).unwrap();
+    /// assert!(!token.is_empty());
     /// ```
     pub fn generate_token<T: Serialize>(
         &self,
@@ -148,7 +169,7 @@ impl AuthService {
             &DecodingKey::from_secret(self.secret_key.as_bytes()),
             &validation,
         ) {
-            let now = Utc::now().timestamp() as usize;
+            let now = usize::try_from(Utc::now().timestamp()).unwrap_or(0);
             data.claims.exp < now
         } else {
             true // Treat invalid token as expired

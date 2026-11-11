@@ -1,6 +1,11 @@
+//! Standardized HTTP response envelope for Actix Web handlers.
+
 use serde::Serialize;
 use actix_web::{HttpRequest, HttpResponse, Responder, body::BoxBody, http::StatusCode};
 
+/// Standardized JSON response envelope for HTTP handlers.
+///
+/// Wraps a message and optional data with an HTTP status code.
 #[derive(Serialize)]
 pub struct ApiResponse<T: Serialize = ()> {
     #[serde(skip)]

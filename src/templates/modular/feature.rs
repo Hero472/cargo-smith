@@ -3,8 +3,31 @@ use anyhow::{Result, bail};
 use std::path::Path;
 use tokio::fs;
 
+/// Returns `true` when `name` is a safe feature identifier.
+///
+/// A valid name starts with an ASCII lowercase letter and contains only
+/// lowercase letters, digits, underscores and hyphens. This prevents path
+/// traversal and keeps generated module/file names valid Rust identifiers.
+pub fn is_valid_feature_name(name: &str) -> bool {
+    let mut chars = name.chars();
+    match chars.next() {
+        Some(first) if first.is_ascii_lowercase() => {}
+        _ => return false,
+    }
+    name.chars()
+        .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-')
+}
+
 pub async fn run(name: &str) -> Result<()> {
     let feature_name = name.to_lowercase();
+
+    if !is_valid_feature_name(&feature_name) {
+        bail!(
+            "invalid feature name '{}': use lowercase letters, digits, '_' or '-'",
+            name
+        );
+    }
+
     let base_path = format!("src/features/{}", feature_name);
 
     // 1. Validation
@@ -52,9 +75,8 @@ async fn register_in_parent_mod(name: &str) -> Result<()> {
 
     // Ensure markers exist for injection
     if !content.contains("// [SMITH-MOD]") {
-        content = format!(
-            "use actix_web::web;\n\n// [SMITH-MOD]\n\npub fn init(cfg: &mut web::ServiceConfig) {{\n    // [SMITH-INIT]\n}}\n"
-        );
+        content = "use actix_web::web;\n\n// [SMITH-MOD]\n\npub fn init(cfg: &mut web::ServiceConfig) {\n    // [SMITH-INIT]\n}\n"
+            .to_string();
     }
 
     if content.contains("_cfg: &mut web::ServiceConfig") {
@@ -74,4 +96,29 @@ async fn register_in_parent_mod(name: &str) -> Result<()> {
 
     fs::write(mod_file, content).await?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn valid_feature_names() {
+        assert!(is_valid_feature_name("users"));
+        assert!(is_valid_feature_name("user_profile"));
+        assert!(is_valid_feature_name("user-profile"));
+        assert!(is_valid_feature_name("u2"));
+    }
+
+    #[test]
+    fn invalid_feature_names() {
+        assert!(!is_valid_feature_name(""));
+        assert!(!is_valid_feature_name("Users"));
+        assert!(!is_valid_feature_name("1users"));
+        assert!(!is_valid_feature_name("../etc"));
+        assert!(!is_valid_feature_name("a/b"));
+        assert!(!is_valid_feature_name("a\\b"));
+        assert!(!is_valid_feature_name("-foo"));
+        assert!(!is_valid_feature_name("_foo"));
+    }
 }

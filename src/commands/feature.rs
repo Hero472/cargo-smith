@@ -6,12 +6,14 @@ use anyhow::Context;
 
 use crate::templates::{TemplateType, types::CargoSmith};
 
+/// Arguments for the `feature` (add feature) command.
 #[derive(Args)]
 pub struct FeatureArgs {
-    /// Name of the feature (e.g., "users")
+    /// Name of the feature to generate (e.g., "users").
     pub name: String,
 }
 
+/// Executes the `feature` command, generating a new feature module.
 pub async fn execute(args: FeatureArgs) -> Result<()> {
     let config_path = ".cargo-smith";
     

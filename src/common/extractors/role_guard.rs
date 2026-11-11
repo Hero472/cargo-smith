@@ -5,6 +5,7 @@ use futures::future::{ready, Ready};
 use crate::auth::claims::Claims;
 use crate::common::roles::RequiredRole;
 
+/// Request guard that checks the caller has a specific required role.
 pub struct RoleGuard<R: RequiredRole> {
     _marker: PhantomData<R>
 }

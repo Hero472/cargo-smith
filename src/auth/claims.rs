@@ -1,7 +1,8 @@
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+/// JWT claims payload with subject, issued-at, expiration, and custom data.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Claims<T = serde_json::Value> {
     /// Subject (whom the token refers to)
     pub sub: String,
@@ -23,8 +24,8 @@ impl<T> Claims<T> {
     /// The `iat` and `exp` fields are set automatically based on the current UTC time.
     pub fn with_expiration(sub: String, data: T, ttl: Duration) -> Self {
         let now = Utc::now();
-        let iat = now.timestamp() as usize;
-        let exp = (now + ttl).timestamp() as usize;
+        let iat = usize::try_from(now.timestamp()).unwrap_or(0);
+        let exp = usize::try_from((now + ttl).timestamp()).unwrap_or(0);
         Self { sub, iat, exp, data }
     }
 }

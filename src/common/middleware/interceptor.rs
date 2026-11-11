@@ -4,7 +4,10 @@ use actix_web::{
 };
 use futures::future::{ok, LocalBoxFuture, Ready};
 use std::time::Instant;
+use tracing::info;
 
+/// Middleware that logs each request and injects an `x-response-time-ms` header.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ApiInterceptor;
 
 impl<S, B> Transform<S, ServiceRequest> for ApiInterceptor
@@ -24,6 +27,7 @@ where
     }
 }
 
+/// Per-request service that logs timing and injects response headers.
 pub struct InterceptorMiddleware<S> {
     service: S,
 }
@@ -52,12 +56,14 @@ where
             let elapsed = start_time.elapsed().as_millis();
 
             // Inject custom headers into the final response
-            res.headers_mut().insert(
-                actix_web::http::header::HeaderName::from_static("x-response-time-ms"),
-                actix_web::http::header::HeaderValue::from_str(&elapsed.to_string()).unwrap(),
-            );
+            if let Ok(value) = actix_web::http::header::HeaderValue::from_str(&elapsed.to_string()) {
+                res.headers_mut().insert(
+                    actix_web::http::header::HeaderName::from_static("x-response-time-ms"),
+                    value,
+                );
+            }
 
-            println!("[API] {} {} - {}ms", method, path, elapsed);
+            info!(method = %method, path = %path, elapsed_ms = elapsed, "[API] request completed");
             Ok(res)
         })
     }

@@ -1,3 +1,5 @@
+//! Project templates and the template engine.
+
 use core::fmt;
 use std::str::FromStr;
 
@@ -11,14 +13,16 @@ pub mod types;
 pub mod contents;
 pub mod modular;
 
+/// A project template that can generate a new project and add features.
 #[async_trait]
 pub trait Template {
     fn name(&self) -> &str;
     fn description(&self) -> &str;
-    async fn generate(&self, project_name: &str) -> Result<()>;
+    async fn generate(&self, project_name: &str, with_auth: bool, local: bool) -> Result<()>;
     async fn add_feature(&self, feature_name: &str) -> Result<()>; 
 }
 
+/// Available project template types.
 #[derive(ValueEnum, Copy ,Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum TemplateType {
     #[serde(rename = "modular")]          // Serializes AS "modular"

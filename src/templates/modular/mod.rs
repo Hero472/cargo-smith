@@ -5,6 +5,7 @@ use async_trait::async_trait;
 // Import the logic from the sub-files
 mod generate;
 mod feature;
+mod auth;
 
 pub struct ModularTemplate;
 
@@ -17,8 +18,8 @@ impl Template for ModularTemplate {
     }
 
     // Delegate to the specialized file
-    async fn generate(&self, project_name: &str) -> Result<()> {
-        generate::run(project_name).await
+    async fn generate(&self, project_name: &str, with_auth: bool, local: bool) -> Result<()> {
+        generate::run(project_name, with_auth, local).await
     }
 
     // Delegate to the specialized file

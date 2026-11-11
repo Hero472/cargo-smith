@@ -10,6 +10,7 @@ mod utils;
 #[derive(Parser)]
 #[command(name = "cargo-smith")]
 #[command(version, about = "NestJS-inspired code generator for Rust", long_about = None)]
+/// CLI argument parser for cargo-smith.
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -20,6 +21,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+/// Top-level subcommands.
 enum Commands {
     /// Create a new project
     New(commands::new::NewArgs),
@@ -32,18 +34,21 @@ enum Commands {
     Generate(AddActionArgs),
 }
 
+/// Arguments for the `add` subcommand.
 #[derive(Args)]
 pub struct AddActionArgs {
     #[command(subcommand)]
     pub command: AddCommands,
 }
 
+/// Arguments for the `add` subcommand (alias).
 #[derive(Args)]
 pub struct AddArgs {
     #[command(subcommand)]
     pub command: AddCommands,
 }
 
+/// Available `add` subcommands.
 #[derive(Subcommand)]
 pub enum AddCommands {
     /// Add a new feature module (controller, service, model)
@@ -109,6 +114,8 @@ async fn run_interactive() -> anyhow::Result<()> {
             let empty_args = crate::commands::new::NewArgs {
                 project_name: None,
                 template_type: None,
+                auth: false,
+                local: false,
             };
             create_new_project_interactive(empty_args).await
         },
@@ -147,16 +154,30 @@ async fn create_new_project_interactive(args: NewArgs) -> anyhow::Result<()> {
         None => {
             let choice = Select::with_theme(&theme)
                 .with_prompt("Choose template type")
-                .items(&*templates)
+                .items(templates)
                 .default(0)
                 .interact()?;
-            templates[choice].clone()
+            templates[choice]
         }
     };
     
+    // Ask whether to enable JWT authentication
+    let enable_auth = dialoguer::Confirm::with_theme(&theme)
+        .with_prompt("Enable JWT authentication? (adds auth feature + JwtMiddleware)")
+        .default(false)
+        .interact()?;
+
+    // Ask whether to use local cargo-smith (for development)
+    let use_local = dialoguer::Confirm::with_theme(&theme)
+        .with_prompt("Use local cargo-smith source? (path dependency for development)")
+        .default(false)
+        .interact()?;
+
     println!("\nSummary:");
     println!("  Project: {}", project_name);
     println!("  Template: {}", template);
+    println!("  Auth: {}", if enable_auth { "enabled" } else { "disabled" });
+    println!("  Local dep: {}", if use_local { "yes" } else { "no (crates.io)" });
     // println!("  Features: {}", selected_features.join(", "));
     
     // Step 4: Confirm
@@ -169,6 +190,8 @@ async fn create_new_project_interactive(args: NewArgs) -> anyhow::Result<()> {
         let final_args = commands::new::NewArgs { 
             project_name: Some(project_name),
             template_type: Some(template),
+            auth: enable_auth,
+            local: use_local,
         };
         commands::new::execute(final_args).await
     } else {
